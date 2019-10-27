@@ -1,0 +1,55 @@
+
+{% load static from staticfiles %}
+{% load form_helpers %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Book Edit</title>
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.6-dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'font-awesome-4.6.3/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+
+</head>
+
+<body>
+
+<div class="row">
+<div class="col-md-6 col-md-offset-3">
+<h1>Book Edit</h1>
+
+<form action="." method="post" class="form form-horizontal">
+    {% csrf_token %}
+        <div class="row">
+        <div class="col-md-6">
+            {% render_field form.title %}
+            {% render_field form.author_name %}
+            {% render_field form.author_surname %}
+            {% render_field form.publisher_city %}
+            {% render_field form.year_published %}
+            {% render_field form.ISBN %}
+            {% render_field form.category %}
+            {% render_field form.status %}
+            {% render_field form.language %}
+            {% render_field form.location %}
+            {% render_field form.description %}
+            {% render_field form.notes %}
+            <button type="submit" name="_create" class="btn btn-primary">Edit</button>
+
+            <a href="{{ return_url }}" class="btn btn-default">Cancel</a>
+        </div>
+    </div>
+
+</form>
+
+</div>
+</div>
+
+<script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
+<script src="{% static 'bootstrap-3.3.6-dist/js/bootstrap.min.js' %}"></script>
+</body>
+
+</html>
