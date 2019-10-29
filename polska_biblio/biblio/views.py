@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render, redirect
 from django.conf import settings
 # from django.core.urlresolvers import reverse
@@ -46,15 +47,15 @@ def home(request):
     if search_form.is_valid():
         
         query_str = search_form.cleaned_data['q']
-
-        books = books.filter(author_surname__icontains=query_str)
+        condition = Q(author_surname__icontains=query_str)|Q(author_name__icontains=query_str)
+        books = books.filter(condition)
 
     return render(request, 'home.html', {'book_list': books} )
 
 
 class BookView(View):
 
-    def get(self, request, pk):
+    def get(self, request, pk, *args, **kwargs):
 
         book = get_object_or_404(models.Book, pk=pk)
 
