@@ -11,21 +11,53 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import platform
+
+from django.core.exceptions import ImproperlyConfigured
+
+VERSION = '0.1.0'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Hostname
+HOSTNAME = platform.node()
+
+# Django 2.1+ requires Python 3.5+
+if platform.python_version_tuple() < ('3', '5'):
+    raise RuntimeError(
+        "Polska Biblioteka requires Python 3.5 or higher (current: Python {})".format(platform.python_version())
+    )
+
+try:
+    from polska_biblio import configuration
+except ImportError:
+    raise ImproperlyConfigured(
+        "Configuration file is not present. Please define polska_biblio/polska_biblio/configuration.py per the documentation."
+    )
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
+# Import required configuration parameters
+ALLOWED_HOSTS = DATABASE = SECRET_KEY = None
+for setting in ['ALLOWED_HOSTS', 'DATABASE', 'SECRET_KEY']:
+    try:
+        globals()[setting] = getattr(configuration, setting)
+    except AttributeError:
+        raise ImproperlyConfigured(
+            "Mandatory setting {} is missing from configuration.py.".format(setting)
+        )
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'i4a%d^2l#za&1qjd4d==^*ee=i@zw#gje=k@m&*8eeeg8hs4hk'
+SECRET_KEY = getattr(configuration, 'SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = getattr(configuration, 'DEBUG', False)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.101', ]
+DEFAULT_ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = getattr(configuration, 'ALLOWED_HOSTS', DEFAULT_ALLOWED_HOSTS)
 
 
 # Application definition
@@ -74,10 +106,12 @@ WSGI_APPLICATION = 'polska_biblio.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+DATABASE_NAME = getattr(configuration, 'DATABASE').get('NAME', os.path.join(BASE_DIR, 'data.sqlite3'))
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'data.sqlite3'),
+        'NAME': DATABASE_NAME,
     }
 }
 
@@ -106,7 +140,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = getattr(configuration, 'TIME_ZONE', 'UTC')
 
 USE_I18N = True
 
