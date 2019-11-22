@@ -106,12 +106,12 @@ WSGI_APPLICATION = 'polska_biblio.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASE_NAME = getattr(configuration, 'DATABASE').get('NAME', os.path.join(BASE_DIR, 'data.sqlite3'))
+DATABASE_NAME = getattr(configuration, 'DATABASE').get('NAME', 'data.sqlite3')
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DATABASE_NAME,
+        'NAME': os.path.join(BASE_DIR, DATABASE_NAME),
     }
 }
 
