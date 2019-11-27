@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -46,7 +48,8 @@ class Book(models.Model):
     # front_page = models.ImageField()
     # end_page = models.ImageField()
     notes = models.TextField(blank=True)
-    arrival_date = models.DateField(auto_now_add=True)
+    # arrival_date = models.DateField(auto_now_add=True)
+    arrival_date = models.DateField(default=date.today)
     dismiss_date = models.DateField(blank=True, null=True)
     language = models.CharField(max_length=DEFAULT_MAX_LENGTH, default='Polish')
     # related_books = models.ManyToManyField('self')
