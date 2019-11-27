@@ -24,9 +24,19 @@
     {% csrf_token %}
         <div class="row">
         <div class="col-md-6">
+                {% if form.non_field_errors %}
+                    <div class="panel panel-danger">
+                        <div class="panel-heading"><strong>Errors</strong></div>
+                        <div class="panel-body">
+                            {{ form.non_field_errors }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% render_field book.id %}
             {% render_field form.title %}
             {% render_field form.author_name %}
             {% render_field form.author_surname %}
+            {% render_field form.publisher_name %}
             {% render_field form.publisher_city %}
             {% render_field form.year_published %}
             {% render_field form.ISBN %}
