@@ -45,9 +45,11 @@ def home(request):
     search_form = forms.SearchForm(request.GET)
 
     if search_form.is_valid():
-        
+
+        # Book.objects.annotate(full_name=Concat('author_name', Value(' '), 'author_surname')).filter(full_name='Marian Falski')
         query_str = search_form.cleaned_data['q']
-        condition = Q(author_surname__icontains=query_str)|Q(author_name__icontains=query_str)
+        print(query_str)
+        condition = Q(author_surname__icontains=query_str)|Q(author_name__icontains=query_str)|Q(title__icontains=query_str)
         books = books.filter(condition)
 
     return render(request, 'home.html', {'book_list': books} )
@@ -72,7 +74,8 @@ class BookEditView(GetReturnURLMixin, View):
     form_class = forms.BookForm
     fields_initial = []
     template_name = 'books/book_edit.html'
-    default_return_url = 'home'
+    # default_return_url = 'home'
+    default_return_url = 'book'
 
     def get_object(self, kwargs):
         # Look up object by slug or PK. Return None if neither was provided.
@@ -94,20 +97,22 @@ class BookEditView(GetReturnURLMixin, View):
             'book': book,
             'obj_type': self.model._meta.verbose_name,
             'form': form,
-            'return_url': reverse(self.default_return_url),
+            # 'return_url': redirect(self.default_return_url, book.pk),
+            'return_url': reverse('home'),
         })
 
     def post(self, request, *args, **kwargs):
 
+        obj = self.get_object(kwargs)
         print("request.POST", request.POST, "")
-        form = self.form_class(request.POST)
+        form = self.form_class(request.POST, request.FILES, instance=obj)
 
         if form.is_valid():
             print("VALIDO")
             obj = form.save(commit=False)
             obj_created = not obj.pk
             obj.save()
-            return redirect(reverse(self.default_return_url),)
+            return redirect(self.default_return_url, obj.pk)
         else:
             print("NO VALIDO")
             print("form.errors", form.errors, "")
@@ -115,6 +120,6 @@ class BookEditView(GetReturnURLMixin, View):
 
         return render(request, self.template_name, {
             'form': form,
-            'return_url': reverse(self.default_return_url),
+            'return_url': reverse('home'),
         })
 

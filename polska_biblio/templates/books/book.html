@@ -21,6 +21,14 @@
 <div class="col-md-6 col-md-offset-3">
 {# <h1>Book</h1> #}
 
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissable" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
 
 <div class="pull-right">
      <a href="{% url 'book_edit' book.pk %}" class="btn btn-success">
@@ -38,6 +46,12 @@
                     <strong>Book</strong>
                 </div>
                 <table class="table table-hover panel-body attr-table">
+                    <tr>
+                        <td>Number</td>
+                        <td>
+                            {{ book.id }}
+                        </td>
+                    </tr>
                     <tr>
                         <td>Title</td>
                         <td>

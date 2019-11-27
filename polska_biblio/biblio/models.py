@@ -62,7 +62,7 @@ class Book(models.Model):
             'year': self.year_published,
         }
 
-    # @property
+    @property
     def author_full_name(self):
         return '%s %s' % (self.author_name, self.author_surname)
 
