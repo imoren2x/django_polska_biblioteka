@@ -35,6 +35,8 @@
         <span class="fa fa-pencil" aria-hidden="true"></span>
         Edit
     </a>
+    <a href="{% url 'changepk' book.pk %}" class="btn btn-warning">Change Number</a>
+    <a href="{% url 'home' %}" class="btn btn-default">Home</a>
 </div>
 
 {% if book %}
@@ -71,6 +73,10 @@
                     <tr>
                         <td>ISBN</td>
                         <td>{{ book.ISBN }}</td>
+                    </tr>
+                    <tr>
+                        <td>Category</td>
+                        <td>{{ book.get_category_display }}</td>
                     </tr>
                     <tr>
                         <td>Status</td>

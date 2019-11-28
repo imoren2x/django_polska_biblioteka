@@ -1,0 +1,153 @@
+
+{% load static from staticfiles %}
+{% load form_helpers %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Book View</title>
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.6-dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'font-awesome-4.6.3/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+
+</head>
+
+
+<body>
+
+<div class="row">
+<div class="col-md-6 col-md-offset-3">
+{# <h1>Book</h1> #}
+
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissable" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
+
+{% if book %}
+
+
+
+
+    <h1>Book {{ book.title }}</h1>
+    <!-- <div class="row"> -->
+        <!-- <div class="col-md-6"> -->
+
+    <form action="." method="post" class="form form-horizontal">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                    {% if form.non_field_errors %}
+                        <div class="panel panel-danger">
+                            <div class="panel-heading"><strong>Errors</strong></div>
+                            <div class="panel-body">
+                                {{ form.non_field_errors }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if new_pk_invalid %}
+                        <div class="panel panel-danger">
+                            <div class="panel-heading"><strong>Invalid new number</strong></div>
+                            <div class="panel-body">
+                                <p>The new number {{ new_pk }} is invalid, please choose one that is available.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                {% render_field form.number %}
+
+                <button type="submit" name="_create" class="btn btn-primary">Change number!</button>
+
+                <a href="{{ return_url }}" class="btn btn-default">Cancel</a>
+            </div>
+        </div>
+
+    </form>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Book</strong>
+                </div>
+                <table class="table table-hover panel-body attr-table">
+                    <tr>
+                        <td>Current Number</td>
+                        <td>
+                            {{ book.id }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Title</td>
+                        <td>
+                            {{ book.title }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Author</td>
+                        <td>
+                            {{ book.author_full_name }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Publisher (city, year)</td>
+                        <td>{{ book.publisher_name }} ({{ book.publisher_city }}, {{ book.year_published }})</td>
+                    </tr>
+                    <tr>
+                        <td>ISBN</td>
+                        <td>{{ book.ISBN }}</td>
+                    </tr>
+                    <tr>
+                        <td>Category</td>
+                        <td>{{ book.get_category_display }}</td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>{{ book.get_status_display }}</td>
+                    </tr>
+                    <tr>
+                        <td>Shelf location</td>
+                        <td>{{ book.location }}</td>
+                    </tr>
+                    <tr>
+                        <td>Language</td>
+                        <td>{{ book.language }}</td>
+                    </tr>
+                    <tr>
+                        <td>Arrival Date</td>
+                        <td>{{ book.arrival_date }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Description</strong>
+                </div>
+                <div class="panel-body">
+                    {{ book.description }}
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>notes</strong>
+                </div>
+                <div class="panel-body">
+                    {{ book.notes }}
+                </div>
+            </div>
+        <!-- </div> -->
+    <!-- </div> -->
+
+{% else %}
+    <p>There is no Book.</p>
+{% endif %}
+
+</div>
+</div>
+</body>
+
+</html>

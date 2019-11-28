@@ -27,5 +27,6 @@ urlpatterns = [
     path(r'books/<int:pk>/', biblio.views.BookView.as_view(), name='book'),
     path(r'books/add/', biblio.views.BookEditView.as_view(), name='book_add'),
     path(r'books/<int:pk>/edit/', biblio.views.BookEditView.as_view(), name='book_edit'),
+    path(r'books/changepk/<int:pk>/', biblio.views.ChangePKBookView.as_view(), name='changepk'),
 
 ]
