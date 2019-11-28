@@ -18,11 +18,11 @@
 
 <div class="row">
 <div class="col-md-6 col-md-offset-3">
-<h1>Book Edit</h1>
+<h1>Edit book number {{ book.id }}</h1>
 
 <form action="." method="post" class="form form-horizontal">
     {% csrf_token %}
-        <div class="row">
+    <div class="row">
         <div class="col-md-6">
                 {% if form.non_field_errors %}
                     <div class="panel panel-danger">
@@ -32,7 +32,17 @@
                         </div>
                     </div>
                 {% endif %}
-            {% render_field book.id %}
+                {% if number_invalid %}
+                    <div class="panel panel-danger">
+                        <div class="panel-heading"><strong>Errors</strong></div>
+                        <div class="panel-body">
+                                <p>The number {{ number }} is invalid, please choose one that is available.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            {% if number_form %}
+                {% render_field number_form.number %}
+            {% endif %}
             {% render_field form.title %}
             {% render_field form.author_name %}
             {% render_field form.author_surname %}
@@ -44,8 +54,11 @@
             {% render_field form.status %}
             {% render_field form.language %}
             {% render_field form.location %}
+            <p>Description:</p><br/>
             {% render_field form.description %}
+            <p>Notes:</p><br/>
             {% render_field form.notes %}
+
             <button type="submit" name="_create" class="btn btn-primary">Edit</button>
 
             <a href="{{ return_url }}" class="btn btn-default">Cancel</a>
