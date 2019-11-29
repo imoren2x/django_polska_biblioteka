@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="{% static 'font-awesome-4.6.3/css/font-awesome.min.css' %}">
     <link rel="stylesheet" href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
 
 </head>
 
@@ -18,7 +17,7 @@
 
 <div class="row">
 <div class="col-md-6 col-md-offset-3">
-<h1>Edit book number {{ book.id }}</h1>
+<h1>{% if book.id %}Edit book number {{ book.id }}{% else %}Create new book{% endif %}</h1>
 
 <form action="." method="post" class="form form-horizontal">
     {% csrf_token %}
@@ -59,7 +58,7 @@
             <p>Notes:</p><br/>
             {% render_field form.notes %}
 
-            <button type="submit" name="_create" class="btn btn-primary">Edit</button>
+            <button type="submit" name="_create" class="btn btn-primary">{% if book.id %}Edit{% else %}Create{% endif %}</button>
 
             <a href="{{ return_url }}" class="btn btn-default">Cancel</a>
         </div>
@@ -69,10 +68,10 @@
 
 </div>
 </div>
-
 <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
 <script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
 <script src="{% static 'bootstrap-3.3.6-dist/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/forms.js' %}"></script>
 </body>
 
 </html>
