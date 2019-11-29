@@ -17,8 +17,32 @@
 
 <body>
 
+    <div class="col-md-6 col-md-offset-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissable" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+
 <div class="row">
 <div class="col-md-6 col-md-offset-3">
+
+    {% if just_deleted %}
+        <div class="alert alert-success alert-dismissable" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            Book number {{ book_deleted.pk }} has been successfully deleted.<br/>
+            {{ book_deleted.author_full_name }}: '{{ book_deleted.title }}' published by {{ book_deleted.publisher_name }} ({{ book_deleted.publisher_city }}, {{ book_deleted.year_published }})
+        </div>
+    {% endif %}
+
+
+
 <h1>Polska Biblioteka w Cambridge</h1>
 
 <div class="row" style="padding-bottom: 20px">
@@ -31,11 +55,34 @@
     </div>
 </div>
 
+<div class="row" >
+
+{% if not search %}
+    <p>Books: {{ available_count }} available; {{ borrowed_count }} borrowed</p>
+{% elif search %}
+    <p>Search: {{ book_list.count }} books found</p>
+{% endif %}
+
+{% if not search  %}
 <div class="pull-right">
-     <a href="{% url 'book_add' %}" class="btn btn-success">
+    <a href="{% url 'book_add' %}" class="btn btn-success">
         <span class="fa fa-pencil" aria-hidden="true"></span>
         Add Book
     </a>
+    <a href="{% url 'backup_json' %}" class="btn btn-secondary">
+        <!-- <span class="fa fa-pencil" aria-hidden="true"></span> -->
+        Backup
+    </a>
+</div>
+{% else %}
+<div class="pull-right">
+    <a href="{% url 'home' %}" class="btn btn-success">
+        <!-- <span class="fa fa-pencil" aria-hidden="true"></span> -->
+        Home
+    </a>
+</div>
+
+{% endif %}
 </div>
 
 {% if book_list %}
@@ -52,23 +99,39 @@
 
         {% for book in book_list %}
         <tr>
+            <!-- Number/PK -->
             <td><a href="{% url 'book' book.pk %}" _target="blank">{{ book.pk }}</a></td>
-            <td>{{ book.title }}</td>
-            <td>{{ book.author_full_name }}</td>
-            <td>{{ book.publisher_name }} ({{ book.publisher_city }}, {{ book.year_published }})</td>
-            <td>{{ book.get_category_display }} ({{ book.location }})</td>
-            <td>{{ book.get_status_display }}</td>
+            <!-- title -->
+            <td><a href="{% url 'book' book.pk %}" _target="blank">{{ book.title }}</a></td>
+            <!-- author_full_name -->
+            <td><a href="{% url 'author' book.pk %}" _target="blank">{{ book.author_full_name }}</a></td>
+            <!-- Published and city -->
+            <td><a href="{% url 'publisher_name' book.pk %}" _target="blank">{{ book.publisher_name }}</a> (<a href="{% url 'publisher_city' book.pk %}" _target="blank">{{ book.publisher_city }}</a>, <a href="{% url 'year_published' book.pk %}" _target="blank">{{ book.year_published }}</a>)</td>
+            <!-- category and location -->
+            <td><a href="{% url 'category' book.pk %}" _target="blank">{{ book.get_category_display }}</a> (<a href="{% url 'location' book.pk %}" _target="blank">{{ book.location }}</a>)</td>
+            <!-- status -->
+            <td><a href="{% url 'status' book.pk %}" _target="blank">{{ book.get_status_display }}</a></td>
         </tr>
         {% endfor %}
 
     </table>
 
 {% else %}
+    {% if not search  %}
     <p>There are no Books in the database.</p>
+    {% else %}
+    <p>The search didn't find any book in the current database.</p>
+    {% endif %}
 {% endif %}
 
 </div>
 </div>
 </body>
+
+
+<script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
+<script src="{% static 'bootstrap-3.3.6-dist/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/forms.js' %}"></script>
 
 </html>

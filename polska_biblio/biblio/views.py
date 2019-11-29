@@ -1,7 +1,11 @@
+import csv
+import datetime
+
 from django.shortcuts import render
 
 # Create your views here.
-from django.db.models import Q
+from django.db.models import Q, CharField, Value
+from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, render, redirect
 from django.conf import settings
 # from django.core.urlresolvers import reverse
@@ -9,6 +13,8 @@ from django.urls import reverse
 from django.urls import resolve
 from . import models, forms
 from django.views.generic import View, ListView
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 
 
 class GetReturnURLMixin(object):
@@ -30,30 +36,181 @@ class GetReturnURLMixin(object):
 
 # Create your views here.
 
-def home(request):
+def home(request, *args, **kwargs):
     """
     View for rendering home for both: authorized and unauthorised users.
     """
-    books = models.Book.objects.all()
+    books = models.Book.objects.annotate(full_name=Concat('author_name', Value(' '), 'author_surname')).all()
+    available_count = books.filter(status='AVAILABLE').count()
+    borrowed_count = books.filter(status='BORROWED').count()
 
     # No query
     if 'q' not in request.GET:
 
         return render(request, 'home.html', {
             'book_list': books,
+            'available_count': available_count,
+            'borrowed_count': borrowed_count,
+            'search': False,
         })
 
     search_form = forms.SearchForm(request.GET)
 
     if search_form.is_valid():
 
-        # Book.objects.annotate(full_name=Concat('author_name', Value(' '), 'author_surname')).filter(full_name='Marian Falski')
-        query_str = search_form.cleaned_data['q']
-        print(query_str)
-        condition = Q(author_surname__icontains=query_str)|Q(author_name__icontains=query_str)|Q(title__icontains=query_str)
-        books = books.filter(condition)
+        query_str = search_form.cleaned_data['q'].strip()
+        # author
+        Q_author = Q(full_name__icontains=query_str)
+        # title
+        Q_title = Q(title__icontains=query_str)
+        # publisher
+        Q_publisher = Q(publisher_name__icontains=query_str)
+        # year_published
+        Q_year_published = Q(year_published__icontains=query_str)
+        # ISBN
+        Q_ISBN = Q(ISBN__icontains=query_str)
+        # category
+        Q_category = Q(category__icontains=query_str)
+        # status
+        Q_status = Q(status__icontains=query_str)
+        # location
+        Q_location = Q(location__icontains=query_str)
+        # language
+        Q_language = Q(language__icontains=query_str)
+        
+        books = books.filter(
+                Q_author|Q_title|Q_publisher|Q_year_published|
+                Q_ISBN|Q_category|Q_status|Q_location|Q_language
+            )
 
-    return render(request, 'home.html', {'book_list': books} )
+    return render(request, 'home.html', {
+                    'book_list': books,
+                    'search': True,
+                 })
+
+
+def backup_json(request):
+
+    response = JsonResponse([dict(book) for book in models.Book.objects.all().values()], safe=False)
+
+    strftime = datetime.datetime.now().strftime('%Y-%m-%d__%H-%M-%S')
+    filename = "Biblioteka_books_%s.json" % strftime
+
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+
+    return response
+
+# class Echo:
+    # """An object that implements just the write method of the file-like
+    # interface.
+    # """
+    # def write(self, value):
+        # """Write the value by returning it, instead of storing in a buffer."""
+        # return value
+
+
+# def backup_csv(request):
+    # """A view that streams a large CSV file."""
+    # # Generate a sequence of rows. The range is based on the maximum number of
+    # # rows that can be handled by a single sheet in most spreadsheet
+    # # applications.
+    # # # rows = (["Row {}".format(idx), str(idx)] for idx in range(65536))
+    # header = ['pk', 'title', 'author_name', 'author_surname', 'publisher_name', 'publisher_city', 'year_published', 'ISBN', 'category', 'status', 'location', 'description', 'notes', 'arrival_date', 'dismiss_date', 'language', ]
+    # rows = (header, 
+    # pseudo_buffer = Echo()
+    # writer = csv.writer(pseudo_buffer)
+    # response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                     # content_type="text/csv")
+    # response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+    # return response
+
+
+def book_author(request, *args, **kwargs):
+
+    pk = kwargs.get('pk')
+    author_book = models.Book.objects.get(pk=pk)
+    
+    books = models.Book.objects.filter(
+            author_name=author_book.author_name,
+            author_surname=author_book.author_surname,
+        )
+
+    return render(request, 'home.html', {
+        'book_list': books,
+        'search': True,
+    })
+
+def publisher_name(request, *args, **kwargs):
+
+    pk = kwargs.get('pk')
+    publisher_book = models.Book.objects.get(pk=pk)
+    
+    books = models.Book.objects.filter(publisher_name=publisher_book.publisher_name)
+
+    return render(request, 'home.html', {
+        'book_list': books,
+        'search': True,
+    })
+
+def publisher_city(request, *args, **kwargs):
+
+    pk = kwargs.get('pk')
+    city_book = models.Book.objects.get(pk=pk)
+    
+    books = models.Book.objects.filter(publisher_city=city_book.publisher_city)
+
+    return render(request, 'home.html', {
+        'book_list': books,
+        'search': True,
+    })
+
+def year_published(request, *args, **kwargs):
+
+    pk = kwargs.get('pk')
+    year_book = models.Book.objects.get(pk=pk)
+    
+    books = models.Book.objects.filter(year_published=year_book.year_published)
+
+    return render(request, 'home.html', {
+        'book_list': books,
+        'search': True,
+    })
+
+def status(request, *args, **kwargs):
+
+    pk = kwargs.get('pk')
+    status_book = models.Book.objects.get(pk=pk)
+    
+    books = models.Book.objects.filter(status=status_book.status)
+
+    return render(request, 'home.html', {
+        'book_list': books,
+        'search': True,
+    })
+
+def category(request, *args, **kwargs):
+
+    pk = kwargs.get('pk')
+    category_book = models.Book.objects.get(pk=pk)
+    
+    books = models.Book.objects.filter(category=category_book.category)
+
+    return render(request, 'home.html', {
+        'book_list': books,
+        'search': True,
+    })
+
+def location(request, *args, **kwargs):
+
+    pk = kwargs.get('pk')
+    location_book = models.Book.objects.get(pk=pk)
+    
+    books = models.Book.objects.filter(location=location_book.location)
+
+    return render(request, 'home.html', {
+        'book_list': books,
+        'search': True,
+    })
 
 
 class BookView(View):
@@ -116,16 +273,22 @@ class BookEditView(GetReturnURLMixin, View):
         form = self.form_class(request.POST, request.FILES, instance=obj)
         number_form = forms.ChangePKBookForm(request.POST, request.FILES)
         valid_form = number_form.is_valid()
-        number = number_form.cleaned_data['number']
-        number_isavailable = models.Book.objects.filter(pk=number).count() == 0
+        if valid_form:
+            number = number_form.cleaned_data['number']
+            number_isavailable = models.Book.objects.filter(pk=number).count() == 0
+        else:
+            number_isavailable = False
+            number = None
 
-        if form.is_valid() and number_isavailable:
+        if valid_form and form.is_valid() and number_isavailable:
             print("VALIDO")
             obj = form.save(commit=False)
             obj_created = not obj.pk
             if obj_created:
                 obj.pk = number
-            obj.save()
+            elif number != obj.pk:
+                obj.save()
+
             return redirect(self.default_return_url, obj.pk)
         else:
             print("NO VALIDO")
@@ -199,3 +362,37 @@ class ChangePKBookView(BookEditView):
             'return_url': reverse('home'),
         })
 
+
+class BookDelView(BookEditView):
+    """
+    """
+    model = models.Book
+    form_class = forms.ChangePKBookForm
+    template_name = 'books/book.html'
+    template_return = 'home.html'
+    default_return_url = 'book'
+
+    def get(self, request, *args, **kwargs):
+
+        book = self.get_object(kwargs)
+
+        return render(request, self.template_name, {
+            'book': book,
+            'obj_type': self.model._meta.verbose_name,
+            'return_url': reverse(self.default_return_url, args=[book.pk]),
+            'delete': True,
+        })
+
+    def post(self, request, *args, **kwargs):
+
+        book = self.get_object(kwargs)
+        print("request.POST", request.POST, "")
+        # import pdb; pdb.set_trace()
+
+        deleted_number = book.pk
+        book.delete()
+        messages.success(request,
+                "Book number %s, %s, has been successfully deleted." % (deleted_number, str(book))
+            )
+
+        return redirect('home')

@@ -28,5 +28,15 @@ urlpatterns = [
     path(r'books/add/', biblio.views.BookEditView.as_view(), name='book_add'),
     path(r'books/<int:pk>/edit/', biblio.views.BookEditView.as_view(), name='book_edit'),
     path(r'books/changepk/<int:pk>/', biblio.views.ChangePKBookView.as_view(), name='changepk'),
+    path(r'books/delete/<int:pk>/', biblio.views.BookDelView.as_view(), name='book_del'),
+    path(r'books/author/<int:pk>/', biblio.views.book_author, name='author'),
+    path(r'books/publisher_name/<int:pk>/', biblio.views.publisher_name, name='publisher_name'),
+    path(r'books/publisher_city/<int:pk>/', biblio.views.publisher_city, name='publisher_city'),
+    path(r'books/year_published/<int:pk>/', biblio.views.year_published, name='year_published'),
+    path(r'books/status/<int:pk>/', biblio.views.status, name='status'),
+    path(r'books/category/<int:pk>/', biblio.views.category, name='category'),
+    path(r'books/location/<int:pk>/', biblio.views.location, name='location'),
+
+    path(r'backup_json/', biblio.views.backup_json, name='backup_json'),
 
 ]

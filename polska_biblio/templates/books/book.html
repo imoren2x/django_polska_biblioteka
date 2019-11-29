@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="{% static 'font-awesome-4.6.3/css/font-awesome.min.css' %}">
     <link rel="stylesheet" href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
 
 </head>
 
@@ -21,26 +20,37 @@
 <div class="col-md-6 col-md-offset-3">
 {# <h1>Book</h1> #}
 
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissable" role="alert">
+        {% if delete %}
+            <div class="alert alert-warning alert-dismissable" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span>&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
-                {{ message }}
+                You are about to delete a book, this action is not undoable<br/>
+                Are you sure you want to delete it?
             </div>
-        {% endfor %}
-
-<div class="pull-right">
-     <a href="{% url 'book_edit' book.pk %}" class="btn btn-success">
-        <span class="fa fa-pencil" aria-hidden="true"></span>
-        Edit
-    </a>
-    <a href="{% url 'changepk' book.pk %}" class="btn btn-warning">Change Number</a>
-    <a href="{% url 'home' %}" class="btn btn-default">Home</a>
-</div>
+        {% endif %}
 
 {% if book %}
+
     <h1>Book {{ book.title }}</h1>
+
+    <div class="pull-right">
+        {% if not delete %}
+                <a href="{% url 'book_edit' book.pk %}" class="btn btn-success">
+                    <span class="fa fa-pencil" aria-hidden="true"></span>
+                    Edit
+                </a>
+                <a href="{% url 'changepk' book.pk %}" class="btn btn-warning">Change Number</a>
+                <a href="{% url 'home' %}" class="btn btn-default">Home</a>
+        {% else %}
+            
+    <form action="." method="post" class="form form-horizontal">
+        {% csrf_token %}
+            
+            <button type="submit" name="_delete" class="btn btn-danger">Delete!</button>
+    </form>
+        {% endif %}
+    </div>
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">
@@ -119,8 +129,20 @@
     <p>There is no Book.</p>
 {% endif %}
 
+
+{% if not delete %}
+    <a href="{% url 'book_del' book.pk %}" class="btn btn-danger">Delete?</a>
+{% endif %}
+
 </div>
 </div>
+
+
+<script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
+<script src="{% static 'bootstrap-3.3.6-dist/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/forms.js' %}"></script>
+
 </body>
 
 </html>

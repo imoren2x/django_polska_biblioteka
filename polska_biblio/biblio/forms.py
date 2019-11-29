@@ -46,3 +46,8 @@ class BookForm(forms.ModelForm):
 class ChangePKBookForm(forms.Form):
 
     number = forms.IntegerField(required=True, label='New Number')
+
+
+class BookDeleteForm(forms.ModelForm):
+
+    pass
