@@ -6,11 +6,38 @@ import yaml
 import sys
 import pdb
 import logging
+import openpyxl
 
 
 KATALOG_FIELDS = ['ISBN', 'Title', 'Name', 'Surname', 'Publisher', 'City', ]  # 'Year', ]
 DB_FIELDS = ['ISBN', 'title', 'author_name', 'author_surname', 'publisher_name', 'publisher_city', ]  # 'year_published', ]
+DB_ROW_KEYS = [ 'id', 'title', 'author_surname', 'author_name', 'publisher_name', 'publisher_city', 'year_published', 'category', 'ISBN', 'status', 'Available', 'location', 'White card', 'Book card', 'Kind', 'Amount', 'Marking', 'notes', 'description', ]
 
+
+def read_excel(input_file_str):
+    workbook = openpyxl.load_workbook(input_file_str)
+    sheet = workbook.active
+
+    excel_yaml = list()
+    for row_index in range(2, sheet.max_row):
+        row_excel = sheet[row_index]
+        raw_row = [cell.value for cell in row_excel]
+
+        row_dict = dict(zip(DB_ROW_KEYS, raw_row))
+        if isinstance(row_dict['id'], float):
+            row_dict['id'] = int(row_dict['id'])
+        if isinstance(row_dict['year_published'], float):
+            row_dict['year_published'] = int(row_dict['year_published'])
+        if isinstance(row_dict['Amount'], float):
+            row_dict['Amount'] = int(row_dict['Amount'])
+
+        for key, value in row_dict.items():
+            if isinstance(value, str) and value != value.strip():
+                row_dict[key] = value.strip()
+
+        excel_yaml.append(row_dict)
+
+    return excel_yaml
 
 
 def read_yaml(input_file_str):

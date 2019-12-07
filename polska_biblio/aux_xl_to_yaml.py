@@ -53,6 +53,28 @@ ROW_KEYS_PL = [
     'Opis',
 ]
 
+ROW_KEYS = [
+    'id',
+    'title',
+    'author_surname',
+    'author_name',
+    'publisher_name',
+    'publisher_city',
+    'year_published',
+    'category',
+    'ISBN',
+    'status',
+    'Available', # not important at the moment
+    'location',
+    'White card',
+    'Book card',
+    'Kind',
+    'Amount',
+    'Marking',
+    'notes',
+    'description',
+]
+
 DEBUG = False
 NUMBER_OF_ROWS_INI = 1
 NUMBER_OF_ROWS_END = None
