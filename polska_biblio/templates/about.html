@@ -1,0 +1,86 @@
+
+{% load static from staticfiles %}
+{% load form_helpers %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>About</title>
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.6-dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'font-awesome-4.6.3/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+
+</head>
+
+
+<body>
+
+    <div class="col-md-6 col-md-offset-3">
+        <div class="pull-right">
+            <a href="{% url 'home' %}" class="btn btn-default">
+                Home
+            </a>
+            <p>Version: {{ version }}</p>
+
+        </div>
+    </div>
+
+    <div class="col-md-6 col-md-offset-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissable" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+
+        <h1>About</h1>
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Authors</strong>
+                    </div>
+                    <table class="table table-hover panel-body attr-table">
+                        <tr>
+                            <td>Developer</td>
+                            <td>imoren2x (imoren2x@users.sourceforge.net)</td>
+                        </tr>
+                        <tr>
+                            <td>Infrastructure</td>
+                            <td>Marcelo Suisse (ubriquejazz@gmail.com)</td>
+                        </tr>
+                        <tr>
+                            <td>Architect</td>
+                            <td>Dorota</td>
+                        </tr>
+                    </table>
+                </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Version</strong>
+                </div>
+                <div class="panel-body">
+                    {{ version }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+
+<script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
+<script src="{% static 'bootstrap-3.3.6-dist/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/forms.js' %}"></script>
+
+</html>

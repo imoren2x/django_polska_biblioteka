@@ -23,6 +23,7 @@ urlpatterns = [
     path(r'', biblio.views.home, name='home'),
     path(r'search/', biblio.views.home, name='search'),
     # path(r'search/', biblio.views.SearchView.as_view(), name='search'),
+    path(r'about/', biblio.views.about, name='about'),
 
     path(r'books/<int:pk>/', biblio.views.BookView.as_view(), name='book'),
     path(r'books/add/', biblio.views.BookEditView.as_view(), name='book_add'),
