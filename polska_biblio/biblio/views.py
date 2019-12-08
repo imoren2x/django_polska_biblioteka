@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.db.models import Q, CharField, Value
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, render, redirect
-from django.conf import settings
+# from django.conf import settings
 # from django.core.urlresolvers import reverse
 from django.urls import reverse
 from django.urls import resolve
@@ -15,7 +15,7 @@ from . import models, forms
 from django.views.generic import View, ListView
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
-
+from polska_biblio import settings
 
 class GetReturnURLMixin(object):
     """
@@ -36,6 +36,12 @@ class GetReturnURLMixin(object):
 
 # Create your views here.
 
+def about(request, *args, **kwargs):
+
+    return render(request, 'about.html', {
+            'version': settings.VERSION,
+        })
+
 def home(request, *args, **kwargs):
     """
     View for rendering home for both: authorized and unauthorised users.
@@ -52,6 +58,7 @@ def home(request, *args, **kwargs):
             'available_count': available_count,
             'borrowed_count': borrowed_count,
             'search': False,
+            'version': settings.VERSION,
         })
 
     search_form = forms.SearchForm(request.GET)
@@ -86,6 +93,7 @@ def home(request, *args, **kwargs):
     return render(request, 'home.html', {
                     'book_list': books,
                     'search': True,
+                    'version': settings.VERSION,
                  })
 
 
@@ -269,27 +277,40 @@ class BookEditView(GetReturnURLMixin, View):
     def post(self, request, *args, **kwargs):
 
         obj = self.get_object(kwargs)
+        obj_created = not obj.pk
         print("request.POST", request.POST, "")
         form = self.form_class(request.POST, request.FILES, instance=obj)
-        number_form = forms.ChangePKBookForm(request.POST, request.FILES)
-        valid_form = number_form.is_valid()
-        if valid_form:
-            number = number_form.cleaned_data['number']
-            number_isavailable = models.Book.objects.filter(pk=number).count() == 0
-        else:
-            number_isavailable = False
-            number = None
+        # if add view
+        if obj_created:
+            number_form = forms.ChangePKBookForm(request.POST, request.FILES)
 
-        if valid_form and form.is_valid() and number_isavailable:
+            valid_form = number_form.is_valid()
+            if valid_form:
+                number = number_form.cleaned_data['number']
+                number_isavailable = models.Book.objects.filter(pk=number).count() == 0
+            else:
+                number_isavailable = False
+                number = None
+        else:
+            number_form = None
+
+        # edit
+        if not obj_created and form.is_valid():
             print("VALIDO")
             obj = form.save(commit=False)
-            obj_created = not obj.pk
-            if obj_created:
-                obj.pk = number
-            elif number != obj.pk:
-                obj.save()
+            obj.save()
 
             return redirect(self.default_return_url, obj.pk)
+
+        # add
+        elif obj_created and valid_form and form.is_valid() and number_isavailable:
+            print("VALIDO")
+            obj = form.save(commit=False)
+            if obj_created:
+                obj.pk = number
+
+            return redirect(self.default_return_url, obj.pk)
+
         else:
             print("NO VALIDO")
             print("form.errors", form.errors, "")
