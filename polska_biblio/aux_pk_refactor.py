@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: latin-1 -*-
 
 import copy
 import yaml
@@ -11,7 +10,110 @@ import openpyxl
 
 KATALOG_FIELDS = ['ISBN', 'Title', 'Name', 'Surname', 'Publisher', 'City', ]  # 'Year', ]
 DB_FIELDS = ['ISBN', 'title', 'author_name', 'author_surname', 'publisher_name', 'publisher_city', ]  # 'year_published', ]
-DB_ROW_KEYS = [ 'id', 'title', 'author_surname', 'author_name', 'publisher_name', 'publisher_city', 'year_published', 'category', 'ISBN', 'status', 'Available', 'location', 'White card', 'Book card', 'Kind', 'Amount', 'Marking', 'notes', 'description', ]
+DB_ROW_KEYS = ['id', 'title', 'author_surname', 'author_name', 'publisher_name', 'publisher_city', 'year_published', 'category', 'ISBN', 'status', 'Available', 'location', 'White card', 'Book card', 'Kind', 'Amount', 'Marking', 'notes', 'description', ]
+
+TRIVIAL_FIELDS = ['id', 'title', 'author_name', 'author_surname', 
+ 'publisher_name', 'publisher_city', 'year_published', 'ISBN', 'location',
+ 'notes', 'description', ]
+
+CATEGORY_DICT = {
+    u'pw/ndż': 'PW',
+    'rż/fz': 'RZ',
+    'rż/psych.': 'RZ',
+    'pw/kz': 'PW', 
+    'dz/mł/lektura': 'DZ', 
+    'pz/lek.': 'PZ', 
+    'bg': 'BG', 
+    'rż/rpż': 'RZ', 
+    'rż': 'RZ', 
+    'rż/prż': 'RZ', 
+    'pw/kp/lek.': 'PW', 
+    'h': 'HS', 
+    'dz/mł': 'DZ', 
+    'dz/m': 'DZ', 
+    'pw': 'PW', 
+    'dz/ml': 'DZ', 
+    'pz/kz': 'PZ', 
+    'pz': 'PZ', 
+    'pw/pz': 'PZ', 
+    'rz': 'RZ', 
+    'pw/ft': 'PW', 
+    'pw/kp': 'PW', 
+    'pw/lek.': 'PW', 
+    'rż/fel.': 'RZ', 
+    'pw/kr': 'PW', 
+    'dz/mł/lek.': 'DZ'
+}
+
+
+def _convert_fields(entry):
+
+    global TRIVIAL_FIELDS, CATEGORY_DICT
+    output = {}
+    for field in TRIVIAL_FIELDS:
+        output[field] = entry[field]
+
+    # category
+    category = entry['category']
+    if category in CATEGORY_DICT.keys():
+        output['category'] = CATEGORY_DICT[entry['category']]
+    else:
+        output['category'] = entry['category']
+
+    # status
+    status = entry['status']
+    if status == '' or (status is None):
+        output['status'] = 'AVAILABLE'
+    elif 'przez' in status:
+        output['status'] = 'BORROWED'
+    else:
+        output['status'] = 'UNKNOWN'
+
+    return output
+
+
+from biblio.models import Book
+
+def _set_book(book_args):
+
+    book = Book(
+        id=book_args['id'],
+        title=book_args['title'],
+        author_name=book_args['author_name'] or '',
+        author_surname=book_args['author_surname'] or '',
+        publisher_name=book_args['publisher_name'] or '', 
+        publisher_city=book_args['publisher_city'] or '',
+        year_published=book_args['year_published'],
+        #ISBN=ISBN,
+        category=book_args['category'],
+        status=book_args['status'],
+        location=book_args['location'],
+        #description=description,
+        #notes=notes,
+        )
+    #'''
+    if book_args['ISBN'] is not None:
+        book.ISBN = book_args['ISBN']
+    if book_args['description'] is not None:
+        book.description = book_args['description']
+    if book_args['notes'] is not None:
+        book.notes = book_args['notes']
+
+    return book
+
+
+def insert_yaml(excel_yaml):
+
+    for entry in excel_yaml:
+        try:
+            book_args = _convert_fields(entry)
+            # book = Book(**book_args)
+            book = _set_book(book_args)
+
+            book.save()
+        except Exception as e:
+            print(str(e))
+            pdb.set_trace()
 
 
 def read_excel(input_file_str):
@@ -24,6 +126,9 @@ def read_excel(input_file_str):
         raw_row = [cell.value for cell in row_excel]
 
         row_dict = dict(zip(DB_ROW_KEYS, raw_row))
+        if row_dict['id'] is None:
+            return excel_yaml
+
         if isinstance(row_dict['id'], float):
             row_dict['id'] = int(row_dict['id'])
         if isinstance(row_dict['year_published'], float):
