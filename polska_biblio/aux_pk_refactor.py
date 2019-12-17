@@ -80,9 +80,9 @@ def _set_book(book_args):
         id=book_args['id'],
         title=book_args['title'],
         author_name=book_args['author_name'] or '',
-        author_surname=book_args['author_surname'] or '',
+        author_surname=book_args['author_surname'],
         publisher_name=book_args['publisher_name'] or '', 
-        publisher_city=book_args['publisher_city'] or '',
+        publisher_city=book_args['publisher_city'],
         year_published=book_args['year_published'],
         #ISBN=ISBN,
         category=book_args['category'],
@@ -112,7 +112,7 @@ def insert_yaml(excel_yaml):
 
             book.save()
         except Exception as e:
-            print(str(e))
+            print("Book %s, %s: %s" % (entry['id'], entry['title'], str(e)))
             pdb.set_trace()
 
 
@@ -139,6 +139,8 @@ def read_excel(input_file_str):
         for key, value in row_dict.items():
             if isinstance(value, str) and value != value.strip():
                 row_dict[key] = value.strip()
+            # if key in STR_FIELDS and value is None:
+                # row_dict[key] = ''
 
         excel_yaml.append(row_dict)
 

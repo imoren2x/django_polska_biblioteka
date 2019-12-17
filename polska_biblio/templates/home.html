@@ -73,7 +73,15 @@
     <p>Search: {{ book_list.count }} books found</p>
 {% endif %}
 
-{% if not search  %}
+{% if not full_catalog %}
+<div class="pull-left">
+    <a href="{% url 'home' %}?full_catalog=true" class="btn btn-primary">
+        Full Catalog
+    </a>
+    
+</div>
+{% endif %}
+{% if not search %}
 <div class="pull-right">
     <a href="{% url 'book_add' %}" class="btn btn-success">
         <span class="fa fa-pencil" aria-hidden="true"></span>
