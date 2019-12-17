@@ -50,6 +50,10 @@ def home(request, *args, **kwargs):
     available_count = books.filter(status='AVAILABLE').count()
     borrowed_count = books.filter(status='BORROWED').count()
 
+    full_catalog = True if request.GET.get('full_catalog', '').lower() == 'true' else False
+    if full_catalog is False:
+        books = books.order_by('-id')[0:500+1]
+
     # No query
     if 'q' not in request.GET:
 
@@ -58,6 +62,7 @@ def home(request, *args, **kwargs):
             'available_count': available_count,
             'borrowed_count': borrowed_count,
             'search': False,
+            'full_catalog': full_catalog,
             'version': settings.VERSION,
         })
 
