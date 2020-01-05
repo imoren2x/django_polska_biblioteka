@@ -7,12 +7,15 @@ import pdb
 import logging
 import openpyxl
 
+from biblio.models import Book
+
 
 KATALOG_FIELDS = ['ISBN', 'Title', 'Name', 'Surname', 'Publisher', 'City', ]  # 'Year', ]
 DB_FIELDS = ['ISBN', 'title', 'author_name', 'author_surname', 'publisher_name', 'publisher_city', ]  # 'year_published', ]
+ROW_KEYS_PL = ['Tytuł', 'Nazwisko', 'Imię', 'Wydawnictwo', 'Miasto', 'Rok', 'Kategoria', 'ISBN', 'Wypożyczenia', 'Dostępność', 'Litera', 'Biała kartka', 'Kolorowa kartkaRodzaj', 'Ilość', 'Oznakowanie', 'Adnotacja', 'Opis', ]
 DB_ROW_KEYS = ['id', 'title', 'author_surname', 'author_name', 'publisher_name', 'publisher_city', 'year_published', 'category', 'ISBN', 'status', 'Available', 'location', 'White card', 'Book card', 'Kind', 'Amount', 'Marking', 'notes', 'description', ]
 
-TRIVIAL_FIELDS = ['id', 'title', 'author_name', 'author_surname', 
+TRIVIAL_FIELDS = ['id', 'title', 'author_name', 'author_surname',
  'publisher_name', 'publisher_city', 'year_published', 'ISBN', 'location',
  'notes', 'description', ]
 
@@ -20,100 +23,30 @@ CATEGORY_DICT = {
     u'pw/ndż': 'PW',
     'rż/fz': 'RZ',
     'rż/psych.': 'RZ',
-    'pw/kz': 'PW', 
-    'dz/mł/lektura': 'DZ', 
-    'pz/lek.': 'PZ', 
-    'bg': 'BG', 
-    'rż/rpż': 'RZ', 
-    'rż': 'RZ', 
-    'rż/prż': 'RZ', 
-    'pw/kp/lek.': 'PW', 
-    'h': 'HS', 
-    'dz/mł': 'DZ', 
-    'dz/m': 'DZ', 
-    'pw': 'PW', 
-    'dz/ml': 'DZ', 
-    'pz/kz': 'PZ', 
-    'pz': 'PZ', 
-    'pw/pz': 'PZ', 
-    'rz': 'RZ', 
-    'pw/ft': 'PW', 
-    'pw/kp': 'PW', 
-    'pw/lek.': 'PW', 
-    'rż/fel.': 'RZ', 
-    'pw/kr': 'PW', 
+    'pw/kz': 'PW',
+    'dz/mł/lektura': 'DZ',
+    'pz/lek.': 'PZ',
+    'bg': 'BG',
+    'rż/rpż': 'RZ',
+    'rż': 'RZ',
+    'rż/prż': 'RZ',
+    'pw/kp/lek.': 'PW',
+    'h': 'HS',
+    'dz/mł': 'DZ',
+    'dz/m': 'DZ',
+    'pw': 'PW',
+    'dz/ml': 'DZ',
+    'pz/kz': 'PZ',
+    'pz': 'PZ',
+    'pw/pz': 'PZ',
+    'rz': 'RZ',
+    'pw/ft': 'PW',
+    'pw/kp': 'PW',
+    'pw/lek.': 'PW',
+    'rż/fel.': 'RZ',
+    'pw/kr': 'PW',
     'dz/mł/lek.': 'DZ'
 }
-
-
-def _convert_fields(entry):
-
-    global TRIVIAL_FIELDS, CATEGORY_DICT
-    output = {}
-    for field in TRIVIAL_FIELDS:
-        output[field] = entry[field]
-
-    # category
-    category = entry['category']
-    if category in CATEGORY_DICT.keys():
-        output['category'] = CATEGORY_DICT[entry['category']]
-    else:
-        output['category'] = entry['category']
-
-    # status
-    status = entry['status']
-    if status == '' or (status is None):
-        output['status'] = 'AVAILABLE'
-    elif 'przez' in status:
-        output['status'] = 'BORROWED'
-    else:
-        output['status'] = 'UNKNOWN'
-
-    return output
-
-
-from biblio.models import Book
-
-def _set_book(book_args):
-
-    book = Book(
-        id=book_args['id'],
-        title=book_args['title'],
-        author_name=book_args['author_name'] or '',
-        author_surname=book_args['author_surname'],
-        publisher_name=book_args['publisher_name'] or '', 
-        publisher_city=book_args['publisher_city'],
-        year_published=book_args['year_published'],
-        #ISBN=ISBN,
-        category=book_args['category'],
-        status=book_args['status'],
-        location=book_args['location'],
-        #description=description,
-        #notes=notes,
-        )
-    #'''
-    if book_args['ISBN'] is not None:
-        book.ISBN = book_args['ISBN']
-    if book_args['description'] is not None:
-        book.description = book_args['description']
-    if book_args['notes'] is not None:
-        book.notes = book_args['notes']
-
-    return book
-
-
-def insert_yaml(excel_yaml):
-
-    for entry in excel_yaml:
-        try:
-            book_args = _convert_fields(entry)
-            # book = Book(**book_args)
-            book = _set_book(book_args)
-
-            book.save()
-        except Exception as e:
-            print("Book %s, %s: %s" % (entry['id'], entry['title'], str(e)))
-            pdb.set_trace()
 
 
 def read_excel(input_file_str):
@@ -212,17 +145,81 @@ def __change_pk(db_book, new_pk):
     return db_book
 
 
+def _convert_fields(entry):
+    output = {}
+    for field in TRIVIAL_FIELDS:
+        output[field] = entry[field]
+
+    # category
+    category = entry['category']
+    if category in CATEGORY_DICT.keys():
+        output['category'] = CATEGORY_DICT[entry['category']]
+    else:
+        output['category'] = entry['category']
+
+    # status
+    status = entry['status']
+    if status == '' or (status is None):
+        output['status'] = 'AVAILABLE'
+    elif 'przez' in status:
+        output['status'] = 'BORROWED'
+    else:
+        output['status'] = 'UNKNOWN'
+
+    return output
+
+def _set_book(book_args):
+
+    book = Book(
+        id=book_args['id'],
+        title=book_args['title'],
+        author_name=book_args['author_name'] or '',
+        author_surname=book_args['author_surname'],
+        publisher_name=book_args['publisher_name'] or '',
+        publisher_city=book_args['publisher_city'],
+        year_published=book_args['year_published'],
+        #ISBN=ISBN,
+        category=book_args['category'],
+        status=book_args['status'],
+        location=book_args['location'],
+        #description=description,
+        #notes=notes,
+        )
+    #'''
+    if book_args['ISBN'] is not None:
+        book.ISBN = book_args['ISBN']
+    if book_args['description'] is not None:
+        book.description = book_args['description']
+    if book_args['notes'] is not None:
+        book.notes = book_args['notes']
+
+    return book
+
+
+def save_excel_yaml_to_db(excel_yaml):
+
+    for entry in excel_yaml:
+        try:
+            book_args = _convert_fields(entry)
+            # book = Book(**book_args)
+            book = _set_book(book_args)
+
+            book.save()
+        except Exception as e:
+            print("Book %s, %s: %s" % (entry['id'], entry['title'], str(e)))
+            pdb.set_trace()
+
+
 # from aux_pk_refactor import KATALOG_FIELDS, DB_FIELDS, read_yaml, write_yaml, compare, main
 # katalog_strip = read_yaml('Katalog_2019_10_20_1_4775_strip.yaml')
 # dump_strip = read_yaml('dump_strip.yaml')
 # compare(dump_strip[12], katalog_strip[1])
 DEBUG = False
 
-def main(katalog, db_yaml):
+def compare_lists(katalog, db_yaml):
     # norm_db_yaml = db_yaml[12:3137+1]
     # gen_match_list = list()
     output_db_yaml = list()
-    global DEBUG
 
     same_pk_number = 0
     diff_pk_number = 0
