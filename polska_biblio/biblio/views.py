@@ -51,11 +51,12 @@ def home(request, *args, **kwargs):
     borrowed_count = books.filter(status='BORROWED').count()
 
     full_catalog = True if request.GET.get('full_catalog', '').lower() == 'true' else False
-    if full_catalog is False:
-        books = books.order_by('-id')[0:500+1]
 
-    # No query
+    # No search query
     if 'q' not in request.GET:
+
+        if full_catalog is False:
+            books = books.order_by('-id')[0:settings.BOOKS_PER_PAGE+1]
 
         return render(request, 'home.html', {
             'book_list': books,
@@ -283,14 +284,14 @@ class BookEditView(GetReturnURLMixin, View):
 
         obj = self.get_object(kwargs)
         obj_created = not obj.pk
-        print("request.POST", request.POST, "")
+        # print("request.POST", request.POST, "")
         form = self.form_class(request.POST, request.FILES, instance=obj)
         # if add view
         if obj_created:
             number_form = forms.ChangePKBookForm(request.POST, request.FILES)
 
-            valid_form = number_form.is_valid()
-            if valid_form:
+            valid_number_form = number_form.is_valid()
+            if valid_number_form:
                 number = number_form.cleaned_data['number']
                 number_isavailable = models.Book.objects.filter(pk=number).count() == 0
             else:
@@ -300,19 +301,21 @@ class BookEditView(GetReturnURLMixin, View):
             number_form = None
 
         # edit
-        if not obj_created and form.is_valid():
-            print("VALIDO")
+        valid_main_form = form.is_valid()
+        if not obj_created and valid_main_form:
+            print("edit VALIDO")
             obj = form.save(commit=False)
             obj.save()
 
             return redirect(self.default_return_url, obj.pk)
 
         # add
-        elif obj_created and valid_form and form.is_valid() and number_isavailable:
-            print("VALIDO")
+        elif obj_created and valid_number_form and valid_main_form and number_isavailable:
+            print("add VALIDO")
             obj = form.save(commit=False)
             if obj_created:
                 obj.pk = number
+                obj.save()
 
             return redirect(self.default_return_url, obj.pk)
 
@@ -412,7 +415,7 @@ class BookDelView(BookEditView):
     def post(self, request, *args, **kwargs):
 
         book = self.get_object(kwargs)
-        print("request.POST", request.POST, "")
+        # print("request.POST", request.POST, "")
         # import pdb; pdb.set_trace()
 
         deleted_number = book.pk

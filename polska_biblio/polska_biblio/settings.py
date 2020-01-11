@@ -15,7 +15,7 @@ import platform
 
 from django.core.exceptions import ImproperlyConfigured
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -158,3 +158,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "project-static"),
 )
 STATIC_URL = '/static/'
+
+# Application-specific parameters
+DEFAULT_BOOKS_PER_PAGE = 500
+BOOKS_PER_PAGE = getattr(configuration, 'BOOKS_PER_PAGE', DEFAULT_BOOKS_PER_PAGE)
