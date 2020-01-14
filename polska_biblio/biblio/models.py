@@ -25,7 +25,7 @@ COLOUR_CHOICES = [
 CATEGORY_CHOICES = [ 
     ('PW', 'Novel'), ('KP', 'Polish classics'), ('KZ', 'Foreign classics'), ('RZ', 'Different'), 
     ('HS', 'History'), ('BG', 'Biography'), ('DZ', 'children/youth'), ('PZ', 'Poetry'),
-    ('DVD', 'DVD'), ('AL', 'Albums'), ('RL', 'Religion'),
+    ('DVD', 'DVD'), ('VINYL', 'Vinyl'), ('AL', 'Albums'),
 ]
 
 class Book(models.Model):
