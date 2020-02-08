@@ -110,8 +110,8 @@
             <th>No</th>
             <th>Title</th>
             <th>Author</th>
-            <th>Publisher (city, year)</th>
-            <th>Category (Location)</th>
+            <th>Publisher</th>
+            <th>Category</th>
             <th>Status</th>
         </tr>
 
@@ -124,9 +124,9 @@
             <!-- author_full_name -->
             <td><a href="{% url 'author' book.pk %}" _target="blank">{{ book.author_full_name }}</a></td>
             <!-- Published and city -->
-            <td><a href="{% url 'publisher_name' book.pk %}" _target="blank">{{ book.publisher_name }}</a> (<a href="{% url 'publisher_city' book.pk %}" _target="blank">{{ book.publisher_city }}</a>, <a href="{% url 'year_published' book.pk %}" _target="blank">{{ book.year_published }}</a>)</td>
+            <td><a href="{% url 'publisher_name' book.pk %}" _target="blank">{{ book.publisher_name }}</a>, <a href="{% url 'publisher_city' book.pk %}" _target="blank">{{ book.publisher_city }}</a>, <a href="{% url 'year_published' book.pk %}" _target="blank">{{ book.year_published }}</a></td>
             <!-- category and location -->
-            <td><a href="{% url 'category' book.pk %}" _target="blank">{{ book.get_category_display }}</a> (<a href="{% url 'location' book.pk %}" _target="blank">{{ book.location }}</a>)</td>
+            <td><a href="{% url 'category' book.pk %}" _target="blank">{{ book.get_category_display }}</a></td>
             <!-- status -->
             <td><a href="{% url 'status' book.pk %}" _target="blank">{{ book.get_status_display }}</a></td>
         </tr>

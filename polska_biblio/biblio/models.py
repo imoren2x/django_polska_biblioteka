@@ -24,8 +24,8 @@ COLOUR_CHOICES = [
 
 CATEGORY_CHOICES = [ 
     ('PW', 'Novel'), ('KP', 'Polish classics'), ('KZ', 'Foreign classics'), ('RZ', 'Different'), 
-    ('HS', 'History'), ('BG', 'Biography'), ('DZ', 'children/youth'), ('PZ', 'Poetry'),
-    ('DVD', 'DVD'), ('VINYL', 'Vinyl'), ('AL', 'Albums'),
+    ('HS', 'History'), ('BG', 'Biography'), ('DZ', 'Children/Youth'), ('PZ', 'Poetry'),
+    ('DVD', 'DVD/AB'), ('VINYL', 'Vinyl'), ('AL', 'Albums'),
 ]
 
 class Book(models.Model):
@@ -64,7 +64,7 @@ class Book(models.Model):
 
     @property
     def author_full_name(self):
-        return '%s %s' % (self.author_name, self.author_surname)
+        return '%s, %s' % (self.author_surname, self.author_name)
 
     def get_absolute_url(self):
         return reverse('books', args=[self.pk])
