@@ -68,7 +68,9 @@
 <div class="row" >
 
 {% if not search %}
-    <p>Books: {{ available_count }} available; {{ borrowed_count }} borrowed</p>
+    <p>
+        {% if user.is_authenticated %}Hello, {{ user.username }}: {% endif %}
+        Books: {{ available_count }} available; {{ borrowed_count }} borrowed (Total: {{ books_count }})</p>
 {% elif search %}
     <p>Search: {{ book_list.count }} books found</p>
 {% endif %}
@@ -81,7 +83,7 @@
     
 </div>
 {% endif %}
-{% if not search %}
+{% if not search and request.user.is_authenticated %}
 <div class="pull-right">
     <a href="{% url 'book_add' %}" class="btn btn-success">
         <span class="fa fa-pencil" aria-hidden="true"></span>
@@ -91,16 +93,27 @@
         <!-- <span class="fa fa-pencil" aria-hidden="true"></span> -->
         Backup
     </a>
+    <div class="pull-right">
+        <a href="{% url 'logout' %}" class="btn btn-default">
+            <!-- <span class="fa fa-pencil" aria-hidden="true"></span> -->
+            Logout
+        </a>
+    </div>
 </div>
 {% else %}
+<div class="pull-right">
+    <a href="{% url 'login' %}" class="btn btn-default">
+        <!-- <span class="fa fa-pencil" aria-hidden="true"></span> -->
+        Login
+    </a>
+</div>
+{% endif %}
 <div class="pull-right">
     <a href="{% url 'home' %}" class="btn btn-success">
         <!-- <span class="fa fa-pencil" aria-hidden="true"></span> -->
         Home
     </a>
 </div>
-
-{% endif %}
 </div>
 
 {% if book_list %}

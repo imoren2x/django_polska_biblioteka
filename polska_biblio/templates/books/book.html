@@ -35,20 +35,23 @@
     <h1>Book {{ book.title }}</h1>
 
     <div class="pull-right">
-        {% if not delete %}
+        {% if not delete and request.user.is_authenticated %}
                 <a href="{% url 'book_edit' book.pk %}" class="btn btn-success">
                     <span class="fa fa-pencil" aria-hidden="true"></span>
                     Edit
                 </a>
                 <a href="{% url 'changepk' book.pk %}" class="btn btn-warning">Change Number</a>
+        {% endif %}
+        {% if not delete %}
                 <a href="{% url 'home' %}" class="btn btn-default">Home</a>
-        {% else %}
+        {% elif delete and request.user.is_authenticated %}
             
     <form action="." method="post" class="form form-horizontal">
         {% csrf_token %}
             
             <button type="submit" name="_delete" class="btn btn-danger">Delete!</button>
     </form>
+        <a href="{% url 'book' book.pk %}" class="btn btn-default">Cancel</a>
         {% endif %}
     </div>
     <div class="row">
@@ -130,7 +133,7 @@
 {% endif %}
 
 
-{% if not delete %}
+{% if not delete and request.user.is_authenticated %}
     <a href="{% url 'book_del' book.pk %}" class="btn btn-danger">Delete?</a>
 {% endif %}
 

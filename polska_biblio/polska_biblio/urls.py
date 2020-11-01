@@ -15,11 +15,15 @@ Including another URLconf
 """
 import biblio.views
 
+from django.conf import settings
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path(r'login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path(r'logout/', auth_views.LogoutView.as_view(next_page=settings.LOGIN_REDIRECT_URL), name='logout'),
     path(r'', biblio.views.home, name='home'),
     path(r'search/', biblio.views.home, name='search'),
     # path(r'search/', biblio.views.SearchView.as_view(), name='search'),
