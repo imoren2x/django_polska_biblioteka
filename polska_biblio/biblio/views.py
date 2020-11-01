@@ -14,6 +14,8 @@ from django.urls import resolve
 from . import models, forms
 from django.views.generic import View, ListView
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from polska_biblio import settings
 
@@ -49,8 +51,11 @@ def home(request, *args, **kwargs):
     books = models.Book.objects.annotate(full_name=Concat('author_name', Value(' '), 'author_surname')).all()
     available_count = books.filter(status='AVAILABLE').count()
     borrowed_count = books.filter(status='BORROWED').count()
+    books_count = books.count()
 
     full_catalog = True if request.GET.get('full_catalog', '').lower() == 'true' else False
+
+    messages.warning(request, "This system is in PRE-production state.")
 
     # No search query
     if 'q' not in request.GET:
@@ -62,6 +67,7 @@ def home(request, *args, **kwargs):
             'book_list': books,
             'available_count': available_count,
             'borrowed_count': borrowed_count,
+            'books_count': books_count,
             'search': False,
             'full_catalog': full_catalog,
             'version': settings.VERSION,
@@ -102,7 +108,7 @@ def home(request, *args, **kwargs):
                     'version': settings.VERSION,
                  })
 
-
+@login_required(login_url='/login/')
 def backup_json(request):
 
     response = JsonResponse([dict(book) for book in models.Book.objects.all().values()], safe=False)
@@ -238,10 +244,11 @@ class BookView(View):
         })
 
 
-class BookEditView(GetReturnURLMixin, View):
+class BookEditView(LoginRequiredMixin, GetReturnURLMixin, View):
     """
     Create or edit a single book.
     """
+    login_url = '/login/'
     model = models.Book
     form_class = forms.BookForm
     fields_initial = []
@@ -336,6 +343,7 @@ class BookEditView(GetReturnURLMixin, View):
 class ChangePKBookView(BookEditView):
     """
     """
+    login_url = '/login/'
     model = models.Book
     form_class = forms.ChangePKBookForm
     template_name = 'books/book_changepk.html'
@@ -395,6 +403,7 @@ class ChangePKBookView(BookEditView):
 class BookDelView(BookEditView):
     """
     """
+    login_url = '/login/'
     model = models.Book
     form_class = forms.ChangePKBookForm
     template_name = 'books/book.html'
