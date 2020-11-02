@@ -1,1 +1,1 @@
-web: gunicorn polska_biblio.polska_biblio.wsgi --log-file -
+web: gunicorn polska_biblio.wsgi --log-file -
