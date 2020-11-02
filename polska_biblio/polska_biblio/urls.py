@@ -16,6 +16,7 @@ Including another URLconf
 import biblio.views
 
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path
@@ -44,4 +45,4 @@ urlpatterns = [
 
     path(r'backup_json/', biblio.views.backup_json, name='backup_json'),
 
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -29,35 +29,44 @@ if platform.python_version_tuple() < ('3', '5'):
         "Polska Biblioteka requires Python 3.5 or higher (current: Python {})".format(platform.python_version())
     )
 
+get_setting_param = None
 try:
     from polska_biblio import configuration
+    get_setting_param = lambda param, def_param=None: \
+        getattr(configuration, param, def_param)
 except ImportError:
-    raise ImproperlyConfigured(
-        "Configuration file is not present. Please define polska_biblio/polska_biblio/configuration.py per the documentation."
-    )
+    environ = os.environ.copy()
+    environ["ALLOWED_HOSTS"] = environ.get("ALLOWED_HOSTS", "*").split(";")
+    get_setting_param = lambda param, def_param=None: environ.get(param, def_param)
+    # raise ImproperlyConfigured(
+    #     "Configuration file is not present. Please define polska_biblio/polska_biblio/configuration.py per the documentation."
+    # )
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # Import required configuration parameters
-ALLOWED_HOSTS = DATABASE = SECRET_KEY = None
-for setting in ['ALLOWED_HOSTS', 'DATABASE', 'SECRET_KEY']:
+for setting_key in ['ALLOWED_HOSTS', 'DATABASE_NAME', 'SECRET_KEY']:
     try:
-        globals()[setting] = getattr(configuration, setting)
+        get_setting_param(setting_key)
     except AttributeError:
+        raise ImproperlyConfigured(
+            "Mandatory setting {} is missing from configuration.py.".format(setting)
+        )
+    except KeyError:
         raise ImproperlyConfigured(
             "Mandatory setting {} is missing from configuration.py.".format(setting)
         )
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = getattr(configuration, 'SECRET_KEY')
+SECRET_KEY = get_setting_param('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = getattr(configuration, 'DEBUG', False)
+DEBUG = get_setting_param('DEBUG', False)
 
 DEFAULT_ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-ALLOWED_HOSTS = getattr(configuration, 'ALLOWED_HOSTS', DEFAULT_ALLOWED_HOSTS)
+ALLOWED_HOSTS = get_setting_param('ALLOWED_HOSTS', DEFAULT_ALLOWED_HOSTS)
 
 
 # Application definition
@@ -80,6 +89,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'polska_biblio.urls'
@@ -105,8 +115,7 @@ WSGI_APPLICATION = 'polska_biblio.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
-DATABASE_NAME = getattr(configuration, 'DATABASE').get('NAME', 'data.sqlite3')
+DATABASE_NAME = get_setting_param('DATABASE_NAME', 'data.sqlite3')
 
 DATABASES = {
     'default': {
@@ -140,7 +149,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = getattr(configuration, 'TIME_ZONE', 'UTC')
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -160,7 +169,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "project-static"),
 )
 STATIC_URL = '/static/'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Application-specific parameters
 DEFAULT_BOOKS_PER_PAGE = 500
-BOOKS_PER_PAGE = getattr(configuration, 'BOOKS_PER_PAGE', DEFAULT_BOOKS_PER_PAGE)
+BOOKS_PER_PAGE = int(get_setting_param('BOOKS_PER_PAGE', DEFAULT_BOOKS_PER_PAGE))
