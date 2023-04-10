@@ -14,8 +14,10 @@ import os
 import platform
 
 from django.core.exceptions import ImproperlyConfigured
+from packaging import version
 
 VERSION = '0.2.1'
+PYTHON_VER_MIN = '3.5'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,23 +26,24 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOSTNAME = platform.node()
 
 # Django 2.1+ requires Python 3.5+
-if platform.python_version_tuple() < ('3', '5'):
+if version.parse(platform.python_version()) < version.parse(PYTHON_VER_MIN):
     raise RuntimeError(
-        "Polska Biblioteka requires Python 3.5 or higher (current: Python {})".format(platform.python_version())
+        f"Polska Biblioteka requires Python {PYTHON_VER_MIN} or higher (currently, Python {platform.python_version()})"
     )
 
 get_setting_param = None
 try:
     from polska_biblio import configuration
+    conf_mechanism = "configuration.py"
     get_setting_param = lambda param, def_param=None: \
         getattr(configuration, param, def_param)
 except ImportError:
+    print("Local configuration file is not present.")
+    print("Retrieving the machine-dependent parameters from the local environment variables.")
+    conf_mechanism = "local environment variables"
     environ = os.environ.copy()
     environ["ALLOWED_HOSTS"] = environ.get("ALLOWED_HOSTS", "*").split(";")
     get_setting_param = lambda param, def_param=None: environ.get(param, def_param)
-    # raise ImproperlyConfigured(
-    #     "Configuration file is not present. Please define polska_biblio/polska_biblio/configuration.py per the documentation."
-    # )
 
 
 # Quick-start development settings - unsuitable for production
@@ -49,15 +52,9 @@ except ImportError:
 # Import required configuration parameters
 for setting_key in ['ALLOWED_HOSTS', 'DATABASE_NAME', 'SECRET_KEY']:
     try:
-        get_setting_param(setting_key)
-    except AttributeError:
-        raise ImproperlyConfigured(
-            "Mandatory setting {} is missing from configuration.py.".format(setting)
-        )
-    except KeyError:
-        raise ImproperlyConfigured(
-            "Mandatory setting {} is missing from configuration.py.".format(setting)
-        )
+        assert(get_setting_param(setting_key) is not None)
+    except (AssertionError, AttributeError, KeyError):
+        raise ImproperlyConfigured(f"Mandatory setting {setting_key} is missing from {conf_mechanism}.")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_setting_param('SECRET_KEY')
