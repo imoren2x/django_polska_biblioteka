@@ -7,5 +7,5 @@ packaging==23.0
 python-decouple==3.3
 pytz==2019.3
 PyYAML==5.4
-sqlparse==0.3.0
+sqlparse==0.4.4
 whitenoise==5.2.0
